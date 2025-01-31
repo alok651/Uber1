@@ -1,47 +1,54 @@
-import  { useState, useContext } from "react";
+import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserDataContext } from "./Context/UserContext"; // Import the actual context
-`${import.meta.env.VITE_BASE_URL}/users/signup`
-
 
 const UserSignup = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const navigate = useNavigate();
 
   const { setUser } = useContext(UserDataContext); // Use the correct context
 
   const submitHandler = async (e) => {
     e.preventDefault();
+
+    // Updated payload structure to match backend expectations
     const newUser = {
+      email: email,
       fullname: {
         firstname: firstName,
-        lastname: lastName
+        lastname: lastName,
       },
-      email: email,
       password: password,
     };
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/signup`, newUser);
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`, // Ensure this is the correct endpoint
+        newUser
+      );
 
       if (response.status === 201) {
         const data = response.data;
         setUser(data.user); // Update context with user data
-        navigate('/Home'); // Navigate to the home page
+        navigate("/Home"); // Navigate to the home page
 
         // Reset form fields
-        setEmail('');
-        setPassword('');
-        setFirstName('');
-        setLastName('');
+        setEmail("");
+        setPassword("");
+        setFirstName("");
+        setLastName("");
       }
     } catch (error) {
-      console.error("Signup failed:", error);
-      alert("Signup failed. Please try again.");
+      console.error("Signup failed:", error.response?.data || error.message);
+      alert(
+        `Signup failed: ${
+          error.response?.data?.message || "Please check your input and try again."
+        }`
+      );
     }
   };
 
@@ -100,7 +107,10 @@ const UserSignup = () => {
             </button>
           </form>
           <p className="text-center">
-            Already have an account? <Link to='/login' className="text-blue-600">Login here</Link>
+            Already have an account?{" "}
+            <Link to="/login" className="text-blue-600">
+              Login here
+            </Link>
           </p>
         </div>
         <div>
